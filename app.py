@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from transformers import pipeline
 from utils.data_processing import load_data, save_data, add_member, add_performance
-from utils.visualization import plot_performance
+from utils.visualization import plot_speed_evolution, plotly_speed_evolution, plot_correlation_matrix
 from models.predictive_model import analyze_sentiment
 
 st.title("Club de Sport - Gestion des Performances")
@@ -56,7 +56,9 @@ elif menu == "Performances d'un membre":
     membre_performances = athletes_df[athletes_df["Athlete"] == membre]
     
     if not membre_performances.empty:
-        st.plotly_chart(plot_performance(membre_performances))
+        st.pyplot(plot_speed_evolution(membre_performances, membre))
+        st.plotly_chart(plotly_speed_evolution(membre_performances, membre))
+        st.plotly_chart(plot_correlation_matrix(membre_performances))
         st.dataframe(membre_performances)
         
         sentiment = analyze_sentiment(membre_performances["FeelingText"].tolist())
@@ -71,4 +73,3 @@ if feeling_input:
     sentiment_analyzer = pipeline("sentiment-analysis")
     prediction = sentiment_analyzer(feeling_input)
     st.write(f"Sentiment prédit : {prediction[0]['label']} avec un score de {prediction[0]['score']:.2f}")
-
