@@ -3,10 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from transformers import pipeline
 
-# Charger les données
-# athletes_df = pd.read_csv("athletes.csv")
-athletes_df = pd.read_csv("data/athletes.csv")
-members_df = pd.read_csv("members.csv")
+
+#debogage
+
+st.write("Contenu du répertoire data:", os.listdir("data"))
+st.write("Taille du fichier athletes.csv:", os.path.getsize("data/athletes.csv"))
+
 
 # Titre de l'application
 st.title("Application Club de Sport")
@@ -16,6 +18,13 @@ st.write("Suivi des performances, gestion des membres et analyse prédictive.")
 st.header("Suivi des Performances des Athlètes")
 st.subheader("Données d'entraînement")
 st.write(athletes_df.head())
+
+
+# Charger les données
+
+# athletes_df = pd.read_csv("athletes.csv")
+athletes_df = pd.read_csv("data/athletes.csv")
+members_df = pd.read_csv("members.csv")
 
 # Filtrer par athlète
 selected_athlete = st.selectbox("Sélectionnez un athlète :", athletes_df["Athlete"].unique())
