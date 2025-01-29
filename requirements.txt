@@ -4,3 +4,4 @@ numpy==2.0.2
 matplotlib==3.9.3
 transformers==4.47.0
 torch==2.5.1  
+plotly
