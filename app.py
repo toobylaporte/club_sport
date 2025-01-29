@@ -42,6 +42,7 @@ st.pyplot(fig)
 st.header("Gestion des Membres")
 st.write(members_df)
 
+# Formulaire d'inscription
 with st.form("Inscription"):
     st.subheader("Inscription d'un nouveau membre")
     nom = st.text_input("Nom")
@@ -51,11 +52,23 @@ with st.form("Inscription"):
     submit_button = st.form_submit_button(label="Ajouter")
 
 if submit_button:
-    new_member = {"ID": len(members_df) + 1, "Nom": nom, "Prénom": prenom, 
-                  "DateNaissance": str(date_naissance), "Catégorie": categorie}
-    members_df = members_df.append(new_member, ignore_index=True)
-    members_df.to_csv("members.csv", index=False)
+    # Nouveau membre sous forme de DataFrame
+    new_member = pd.DataFrame({
+        "ID": [len(members_df) + 1],
+        "Nom": [nom],
+        "Prénom": [prenom],
+        "DateNaissance": [str(date_naissance)],
+        "Catégorie": [categorie]
+    })
+
+    # Concaténer le nouveau membre au DataFrame existant
+    members_df = pd.concat([members_df, new_member], ignore_index=True)
+
+    # Sauvegarder les modifications dans le fichier CSV
+    members_df.to_csv("data/members.csv", index=False)
+
     st.success(f"Membre {nom} {prenom} ajouté avec succès !")
+
 
 # Section 3 : Analyse prédictive
 st.header("Analyse Prédictive")
