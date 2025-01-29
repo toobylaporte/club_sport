@@ -1,82 +1,74 @@
 import streamlit as st
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from transformers import pipeline
+from utils.data_processing import load_data, save_data, add_member, add_performance
+from utils.visualization import plot_performance
+from models.predictive_model import analyze_sentiment
 
+st.title("Club de Sport - Gestion des Performances")
 
-#debogage
+# Chargement des données
+athletes_df = load_data("data/athletes.csv")
+members_df = load_data("data/members.csv")
 
-# Charger les données
+# Menu principal
+menu = st.sidebar.selectbox(
+    "Menu",
+    ["Accueil", "Ajouter un membre", "Ajouter une performance", "Liste des membres", "Performances d'un membre"]
+)
 
-# athletes_df = pd.read_csv("athletes.csv")
-athletes_df = pd.read_csv("data/athletes.csv")
-members_df = pd.read_csv("data/members.csv")
+if menu == "Accueil":
+    st.write("Bienvenue dans l'application de gestion des performances du club de sport.")
 
+elif menu == "Ajouter un membre":
+    st.subheader("Ajouter un nouveau membre")
+    with st.form("new_member"):
+        nom = st.text_input("Nom")
+        prenom = st.text_input("Prénom")
+        date_naissance = st.date_input("Date de naissance")
+        categorie = st.selectbox("Catégorie", ["Junior", "Senior", "Elite"])
+        if st.form_submit_button("Ajouter"):
+            members_df = add_member(members_df, nom, prenom, date_naissance, categorie)
+            save_data(members_df, "data/members.csv")
+            st.success(f"Membre {prenom} {nom} ajouté avec succès!")
 
-# Titre de l'application
-st.title("Application Club de Sport")
-st.write("Suivi des performances, gestion des membres et analyse prédictive.")
+elif menu == "Ajouter une performance":
+    st.subheader("Ajouter une performance")
+    with st.form("new_performance"):
+        membre = st.selectbox("Membre", members_df["Nom"] + " " + members_df["Prénom"])
+        date = st.date_input("Date de la performance")
+        distance = st.number_input("Distance (m)", min_value=0)
+        temps = st.number_input("Temps (s)", min_value=0)
+        ressenti = st.slider("Ressenti", 1, 10)
+        if st.form_submit_button("Ajouter"):
+            athletes_df = add_performance(athletes_df, membre, date, distance, temps, ressenti)
+            save_data(athletes_df, "data/athletes.csv")
+            st.success("Performance ajoutée avec succès!")
 
-# Section 1 : Suivi des performances
-st.header("Suivi des Performances des Athlètes")
-st.subheader("Données d'entraînement")
-st.write(athletes_df.head())
+elif menu == "Liste des membres":
+    st.subheader("Liste des membres")
+    st.dataframe(members_df)
 
+elif menu == "Performances d'un membre":
+    st.subheader("Performances d'un membre")
+    membre = st.selectbox("Sélectionner un membre", members_df["Nom"] + " " + members_df["Prénom"])
+    membre_performances = athletes_df[athletes_df["Athlete"] == membre]
+    
+    if not membre_performances.empty:
+        st.plotly_chart(plot_performance(membre_performances))
+        st.dataframe(membre_performances)
+        
+        sentiment = analyze_sentiment(membre_performances["FeelingText"].tolist())
+        st.write(f"Sentiment général : {sentiment}")
+    else:
+        st.write("Aucune performance enregistrée pour ce membre.")
 
-
-# Filtrer par athlète
-selected_athlete = st.selectbox("Sélectionnez un athlète :", athletes_df["Athlete"].unique())
-filtered_df = athletes_df[athletes_df["Athlete"] == selected_athlete]
-
-# Graphique d'évolution de la vitesse
-fig, ax = plt.subplots()
-ax.plot(filtered_df["Date"], filtered_df["Speed"], marker='o')
-ax.set_title(f"Évolution de la vitesse - {selected_athlete}")
-ax.set_xlabel("Date")
-ax.set_ylabel("Vitesse (m/s)")
-plt.xticks(rotation=45)
-st.pyplot(fig)
-
-# Section 2 : Gestion des membres
-st.header("Gestion des Membres")
-st.write(members_df)
-
-# Formulaire d'inscription
-with st.form("Inscription"):
-    st.subheader("Inscription d'un nouveau membre")
-    nom = st.text_input("Nom")
-    prenom = st.text_input("Prénom")
-    date_naissance = st.date_input("Date de naissance")
-    categorie = st.selectbox("Catégorie sportive", ["Junior", "Senior", "Elite"])
-    submit_button = st.form_submit_button(label="Ajouter")
-
-if submit_button:
-    # Nouveau membre sous forme de DataFrame
-    new_member = pd.DataFrame({
-        "ID": [len(members_df) + 1],
-        "Nom": [nom],
-        "Prénom": [prenom],
-        "DateNaissance": [str(date_naissance)],
-        "Catégorie": [categorie]
-    })
-
-    # Concaténer le nouveau membre au DataFrame existant
-    members_df = pd.concat([members_df, new_member], ignore_index=True)
-
-    # Sauvegarder les modifications dans le fichier CSV
-    members_df.to_csv("data/members.csv", index=False)
-
-    st.success(f"Membre {nom} {prenom} ajouté avec succès !")
-
-
-# Section 3 : Analyse prédictive
-st.header("Analyse Prédictive")
-st.subheader("Prédictions basées sur le ressenti")
-
-sentiment_analyzer = pipeline("sentiment-analysis")
-
+# Analyse de sentiment (conservée de l'ancien code)
+st.header("Analyse de Sentiment")
 feeling_input = st.text_input("Ressenti après l'entraînement (en texte) :", "")
 if feeling_input:
+    sentiment_analyzer = pipeline("sentiment-analysis")
     prediction = sentiment_analyzer(feeling_input)
     st.write(f"Sentiment prédit : {prediction[0]['label']} avec un score de {prediction[0]['score']:.2f}")
+
