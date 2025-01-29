@@ -11,7 +11,7 @@ from transformers import pipeline
 
 # athletes_df = pd.read_csv("athletes.csv")
 athletes_df = pd.read_csv("data/athletes.csv")
-members_df = pd.read_csv("members.csv")
+members_df = pd.read_csv("data/members.csv")
 
 
 # Titre de l'application
