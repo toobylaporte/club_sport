@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from transformers import pipeline
 
 # Charger les données
-athletes_df = pd.read_csv("athletes.csv")
+# athletes_df = pd.read_csv("athletes.csv")
+athletes_df = pd.read_csv("data/athletes.csv")
 members_df = pd.read_csv("members.csv")
 
 # Titre de l'application
