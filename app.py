@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from transformers import pipeline
-from utils.data_processing import load_data, save_data, add_member, add_performance
-from utils.visualization import plot_speed_evolution, plotly_speed_evolution, plot_correlation_matrix
+from Utils.data_processing import load_data, save_data, add_member, add_performance
+from Utils.visualization import plot_speed_evolution, plotly_speed_evolution, plot_correlation_matrix
 from models.predictive_model import analyze_sentiment
 
 st.title("Club de Sport - Gestion des Performances")
